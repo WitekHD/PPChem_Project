@@ -1,2 +1,2 @@
 # PPChem_Project
-hi witek
+Le Dossier contient les images des réactions.
