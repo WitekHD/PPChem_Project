@@ -24,8 +24,5 @@ if smiles_input:
 #        mol_weight = Chem.Descriptors.MolWt(mol)
 #        st.write(f"Molar weight : {mol_weight:.2f} g/mol")
         
-        # Afficher la formule brute
-#        formula = Chem.rdMolDescriptors.CalcMolFormula(mol)
-#        st.write(f"Molecular formula : {formula}")
 #    else:
 #        st.write("The entered SMILES is not valid.")
