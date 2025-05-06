@@ -21,7 +21,9 @@ def extract_solvents_from_smiles(file_path, smiles_column='rxn_Smiles'):
         'CCCCCC',    # Hexane (C6H14)
         'C1=CC=CC=C1', # Benzène (C6H6)
         'CCCCCCO',   # Hexanol (C6H14O)
-        'CC(=O)O'    # Acide acétique (C2H4O2)
+        'CC(=O)O',    # Acide acétique (C2H4O2)
+        'CCCCO', # Butan-1-ol (C4H10O)
+        'O', # Water
     ]
     
     # Fonction pour extraire les solvants des réactifs dans la réaction SMILES
