@@ -1,6 +1,6 @@
 import streamlit as st
-from rdkit import Chem
-from rdkit.Chem import Draw
+#from rdkit import Chem
+#from rdkit.Chem import Draw
 
 # Titre de l'application
 st.title("Green solvent")
