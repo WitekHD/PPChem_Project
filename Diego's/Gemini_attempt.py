@@ -50,7 +50,7 @@ You MUST ONLY output the smiles of the solvents in the following format:
 This is an example output for you to visualise with the SMILES: "CN(C)C=O, ClCCl, CS(C)=O"
 
 3. Problems
-If you are given a reactionn name or type which you do now know how to answer, you MUST simply reply with "nan"
+If you are given a reaction name or type which you do now know how to answer, you MUST simply reply with "nan"
 
 """
 #use f string
