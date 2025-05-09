@@ -13,7 +13,7 @@ def retrosynthesis_reaction_smiles(smiles: str, config_path: str = "config.yml")
 
     Args:
         smiles (str): Target molecule in SMILES format.
-        config_path (str): Path to AiZynthFinder's config.yml file.
+        config_path (str): Path to AiZynthFinder's config.yml file. (see their github for more info)
 
     Returns:
         pd.DataFrame: Table with step number, reactants, product, and Reaction SMILES.
@@ -32,7 +32,16 @@ def retrosynthesis_reaction_smiles(smiles: str, config_path: str = "config.yml")
     return df
 
 def rxn_info (df: pd.DataFrame) -> str:
+    """
+    Get the reaction name or class from the reaction SMILES. 
+    If name is 'OtherReaction', returns the class.
 
+    Args:
+        df (pd.DataFrame): DataFrame containing the reaction SMILES.
+
+    Returns:
+        str: Reaction name or class.
+    """
     rxn_smiles=df.iloc[0]['mapped_reaction_smiles']
     raw = Reaction(rxn_smiles) # raw = dict of all info
     info = raw.get_reaction_info()
@@ -41,6 +50,322 @@ def rxn_info (df: pd.DataFrame) -> str:
     else:
         name_class = info.get("CLASS", "Unknown")
     return name_class
+
+def get_solvents_for_reaction(rxn_name):
+    """
+    Get recommended solvents for a given reaction name/type.
+    
+    Args:
+        rxn_name (str): The name or type of the reaction
+        
+    Returns:
+        str: Comma-separated SMILES strings of recommended solvents
+    """
+    known_solvents = [
+        'O',
+        'C1CC2(C(=O)CC1O2)O',
+        'C(C(CO)O)O',
+        'OCCO',
+        'CC(O)CO' ,
+        'OCCOCCO',
+        'OCCN(CCO)CCO',
+        'CS(=O)C',
+        'CCO',
+        'CC(C)O',
+        'CCCC(=O)O',
+        'CC#N',
+        'OCCOCCOCCO',
+        'C[N+](=O)[O-]',
+        'CC(C)(C)O',
+        'CCC(C)O',
+        'CC1COC(=O)O1',
+        'CN(C)P(=O)(N(C)C)N(C)C',
+        'CC(C)CCO',
+        'CC(=O)C',
+        'COCCOCO',
+        'COC(C)CO',
+        'CCCCCO',
+        'COC(C)CO',
+        'CCCOCCO',
+        'CC(=O)CC(C)(C)O',
+        'OC1CCCCC1',
+        'OCc1ccccc1',
+        'CCC(C)(C)O',
+        'c1ccncc1',
+        'CCCC(C)O',
+        'CCOCCOCCO',
+        'CCC(CC)O',
+        'CCC(C)CO',
+        'OCCOCCOCCOCCO',
+        'CC(=O)OC',
+        'O=C1CCCC1',
+        'CCC(=O)C',
+        'CC(C)CC(C)O',
+        'CCCCOCCO',
+        'CN1CCOCC1',
+        'COC(OC)OC',
+        'CCCC(=O)C',
+        'CCCCOCCOCCO',
+        'CCC(=O)OC',
+        'COC(C)C(=O)OC',
+        'CCCOC=O',
+        'CC(=O)OCC',
+        'COC(=O)OC',
+        'O=C1CCCCC1',
+        'CCCCCCCO',
+        'CCC(=O)CC',
+        'CCCOC(C)CO',
+        'CC(=O)OCCOC(=O)C',
+        'CC(=O)OC(C)C',
+        'CCCOC(C)C(=O)OC',
+        'CCCOC(=O)C',
+        'CCCCOC=O',
+        'CC(=O)OCC(OC(=O)C)COC(=O)C',
+        'CC(=O)CC(C)C',
+        'CCOCC',
+        'CCOCCOCCOC',
+        'CC(Cl)Cl',
+        'COC(C)(C)C',
+        'C1CCSC1',
+        'CCCCOCCO',
+        'CC(=O)c1ccccc1',
+        'CC(=O)OCC(C)C',
+        'CC1CCOC1',
+        'COCC(C)OCC(C)OCC(C)O',
+        'CCCCOC(=O)C',
+        'CCOC(OCC)OCC',
+        'c1ccsc1',
+        'CC(C)CCOC(=O)C',
+        'CCCCOCCO(C=O)C',
+        'CCCCCOC(=O)C',
+        'CC(C)OC(C)C',
+        'COC(C)(C)CC',
+        'COc1ccccc1',
+        'c1ccc(Cl)cc1',
+        'CCCCCCOC(=O)C',
+        'CCCCCOC(=O)CC',
+        'c1ccc(Br)cc1',
+        'CCCCOCCOCCO(C=O)C',
+        'c1ccc(Cl)c(Cl)c1',
+        'CC1CCCC1',
+        'CCCOC(=O)CC',
+        'CCc1ccccc1',
+        'CC(C)CCC',
+        'CCCCC',
+        'C1CCCCC1',
+        'Cc1ccc(C)cc1',
+        'CC1CCCCC1',
+        'CC(C)c1ccccc1',
+        'CCC1CCCCC1',
+        'FC1=C(F)C(F)=C(F)C(F)=C1C(F)(F)F',
+        'Cc1cc(C)cc(C)c1',
+        'CCCCc1ccccc1',
+        'CC1=CCC(CC1)C(=C)C',
+        'CCCCCCC',
+        'CCCCCCCC',
+        'C1=CC=C(C=C1)COC(=O)C2=CC=CC=C2',
+        'c1ccc(Oc2ccccc2)cc1',
+        'CCCCCCCCC',
+        'CCCCCCCCCC',
+        'C1(F)(F)C2(F)(F)C(F)(F)C(F)(F)C1(F)C1(F)C(F)(F)C(F)(F)C2(F)C1(F)F',
+        'C[Si](C)(C)O[Si](C)(C)O[Si](C)(C)C',
+        'C[Si](C)(C)O[Si](C)(C)O[Si](C)(C)O[Si](C)(C)C',
+        'C[Si]1(C)O[Si](C)(C)O[Si](C)(C)O[Si](C)(C)O[Si](C)(C)O1',
+        'CCCO',
+        'O=S1CCCC1',
+        'c1ccnnc1',
+        'CCCCO',
+        'CC(C)c1ccc(C)cc1',
+        'CC(C)CO',
+        'O=C1CCCCN1C',
+        'c1cc[nH]c1',
+        'CC1(C)OCC(CO)O1',
+        'c1cncnc1',
+        'CN1CCCC(=O)N(C)C1',
+        'CN1C(=O)C=CC1=O',
+        'CC[N+](=O)[O-]',
+        'CN1CCCCCC1=O',
+        'CC1CCC(=O)O1',
+        'CC(O)C(=O)OCC',
+        'CCCCCCOH',
+        'CC(=O)CC(=O)C',
+        'CCOC=O',
+        'CCCC#N',
+        'Nc1ccccc1',
+        'CCOc1ccccc1',
+        'O=S1OCCO1',
+        'C1CCN=C2CCCCN2CC1',
+        'COC1COC2C1OCC2OC',
+        'COC(C)OC',
+        'C1COCCO1',
+        'COS(=O)OC',
+        'CC(C)C(=O)C',
+        'CC1CCC(CO)CC1',
+        'CC(=O)CC(=O)OCC',
+        'CC(OC)COCC(C)O',
+        'CCC[N+](=O)[O-]',
+        'CC1(C)OCCO1',
+        'Cc1ccccn1',
+        'CCCCOCCOCCOCCO',
+        'C1CCOCC1',
+        'CCCCC(=O)C',
+        'CC1=CC(=O)CC(C)(C)C1',
+        'CC(=O)C(C)(C)C',
+        'c1ccccc1C#N',
+        'CC(OC)COC(=O)C',
+        'ClC=CCl',
+        'CC1CCCCC1=O',
+        'CCC(=O)OCC',
+        'Cc1cccc(C)n1',
+        'CCCC(=O)OC',
+        'CCCCCC#N',
+        'COC(C)OC',
+        'CC(OC(=O)C)COC(=O)C',
+        'COC(=O)CCCCC(=O)OC',
+        'CCCCC(CC)CO',
+        'ClCC(Cl)Cl',
+        'CCCOC(C)COC(C)CO',
+        'COC(OC)(OC)OC',
+        'CC(COC)OC',
+        'COC(C)COC(C)COC',
+        'CCCCCCOCCOCCOH',
+        'CCCC(=O)OCC',
+        'CC(C)C(=O)OCC(C)(C)CC(C)O',
+        'CCOC(=O)OCC',
+        'CNc1ccccc1',
+        'CC(C)C(=O)C(C)C',
+        'C1CSCS1',
+        'CCOCCCC(=O)OCC',
+        'ClC=CCl',
+        'CCCCCCCCOH',
+        'CC1CCCO1',
+        'Fc1ccccc1',
+        'CCCCOCCOCCO',
+        'CCCOCCC',
+        'COC(=O)c1ccccc1',
+        'CC(OC)COC(C)C(=O)OC',
+        'CCNc1ccccc1',
+        'ClC(Cl)C(Cl)(Cl)Cl',
+        'FC(F)(F)c1ccccc1',
+        'C1CCCC1',
+        'CN(C)c1ccccc1',
+        'Ic1ccccc1',
+        'CCCCC(=O)CCCC',
+        'CC(C)CC(=O)CC(C)C',
+        'Cc1ccccc1',
+        'CCOc1ccccc1',
+        'ClC(=C(Cl)Cl)Cl',
+        'CCCCOCCCC',
+        'Clc1cccc(Cl)c1',
+        'CCCCOCCOCCOCCO',
+        'CCN(C(C)C)C(C)C',
+        'c1ccc2CCCc2c1',
+        'FC(F)(F)Oc1ccccc1',
+        'FC1=C(F)C(F)=C(F)C(F)=C1F',
+        'CCN(CC)S(=O)(=O)N(CC)CC',
+        'c1ccc2c(c1)CCCC2',
+        'CC1=CC=C(C=C1)C(C)C',
+        'C[Si](C)(C)O[Si](C)(C)C',
+        'C[Si]1(C)O[Si](C)(C)O[Si](C)(C)O[Si](C)(C)O1',
+        'NC=O',
+        'FC(F)(F)C(=O)O',
+        'O=CO',
+        'CNC=O',
+        'NCCN',
+        'CO',
+        'NCCO',
+        'CC(=O)NC',
+        'CC(=O)O',
+        'OC(C(F)(F)F)C(F)(F)F',
+        'CCC(=O)O',
+        'OCC(F)(F)F',
+        '__loader__CN(C)C(=O)N(C)C',
+        'CC(C)C(=O)O',
+        'COCCO',
+        'CN(C)C=O',
+        'CC(=O)N(C)C',
+        'CC(C)N',
+        'O=S1(=O)CCCC1',
+        'C1COCCN1',
+        'O=C1CCCN(C)1',
+        'CCCN',
+        'CCOCCO',
+        'CCCC#N',
+        'C1CCNC1',
+        'C1OCOCO1',
+        'COC=O',
+        'CC(C)CN',
+        'CC(C)(C)N',
+        'CCCCN',
+        'O=CC1=CC=CO1',
+        'N#CCCCCCC#N',
+        'CCCCCN',
+        'CC(=O)OC(=O)C',
+        'C1CCCO1',
+        'CN(C)P(=O)(N(C)C)N(C)C',
+        'C1CCNCC1',
+        'COCCOC',
+        'NCc1ccccc1',
+        'NC1CCCCC1',
+        'COCCOCCOC',
+        'COCCOCCOCCOC',
+        'CCNCC',
+        'ClCCl',
+        'CC(C)[N+](=O)[O-]',
+        'CCOCCOC(=O)C',
+        'ClC(Cl)Cl',
+        'ClCCCl',
+        'O=[N+]([O-])c1ccccc1',
+        'c1ccc2ncccc2c1',
+        'ClC(Cl)C(Cl)Cl',
+        'ICI',
+        'ClC(=C)Cl',
+        'c1ccoc1',
+        'CCCCNCCC',
+        'CC(C)NC(C)C',
+        'S=C=S',
+        'CCCCNCCCC',
+        'CCN(CC)CC',
+        'CC(Cl)(Cl)Cl',
+        'ClC(Cl)=CCl',
+        'c1ccccc1',
+        'O=C(OC(=O)C(F)(F)F)C(F)(F)F',
+        'ClC(Cl)(Cl)Cl',
+        'CCCCCC',
+        'C1CCC2CCCCC2C1',
+        'CCCCN(CCCC)CCCC']
+
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY")) 
+    
+    prompt=f""" 
+    1. Main goal and context: 
+    You are an expert in assigning solvents to reactions and know which solvent can be used for a given reactant. 
+    You are part of a retro-synthesis program which will be used in mostly in solvent prediction (this is your job). 
+    After your answer, the rest of the code will evaluate the "greeness" (how sustainable the possible solvents are).
+    I hence need you to output only the Simplified Molecular Input Line Entry System (SMILES) of up to three possible 
+    solvents which can be used for the given reaction name (or class if the name cannot be extracted for you, 
+    of course, the class is quite general therefore you can be more general for your answer too). 
+
+    The solvent you must find is to do with the following reaction name/type: {rxn_name}
+
+    2. Constraints and examples
+    The solvent you propose must be part of this list: {known_solvents}
+
+    If you cannot find two solvents, one will do. 
+    You must output at least one solvent and everything you output must be in the list 
+    and in smiles format!
+    You MUST ONLY output the smiles of the solvents in the following format: 
+    "solventsmiles_1, solventsmiles_2, solventsmiles_3"
+
+    This is an example output for you to visualise with the SMILES: "CN(C)C=O, ClCCl, CS(C)=O"
+
+    3. Problems
+    If you are given a reaction name or type which you do now know how to answer, you MUST simply reply with "nan"
+    """
+
+    response = client.models.generate_content(model="gemini-2.0-flash", contents=[prompt])
+    response_stripped = response.text.strip()
+    return response_stripped
 
 def rank_similar_solvents(target_smiles, data_path='SHE_data_with_smiles.csv', n_recommendations=5):
     """
