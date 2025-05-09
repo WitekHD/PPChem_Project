@@ -8,7 +8,10 @@ version = "0.0.1"
 dependencies = [
     "rdkit",
     "numpy == 2.0.1",
-    "rxn_insight"
+    "rxn_insight",
+    "google-generativeai",
+    "aizynthfinder",
+    "python-dotenv",
     ]
 authors = [
   {name = "Diego Meraldi", email = "diego.meraldi@epfl.ch"},
