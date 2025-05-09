@@ -1,11 +1,16 @@
+import os
+import numpy as np
+import pandas as pd
+from pathlib import Path
 from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem.Draw import IPythonConsole
 from rxn_insight.reaction import Reaction
-import pandas as pd
-import numpy as np
 from aizynthfinder.aizynthfinder import AiZynthExpander
-from pathlib import Path
+from dotenv import load_dotenv
+from google import genai
+from google.genai import types
+load_dotenv()
 
 def retrosynthesis_reaction_smiles(smiles: str, config_path: str = "config.yml") -> pd.DataFrame:
     """
